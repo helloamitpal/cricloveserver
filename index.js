@@ -61,7 +61,7 @@ const getParsedResponse = (html) => {
  */
 app.get('/api/matches', function (req, res) {
   request('http://www.cricbuzz.com/api/html/homepage-scag', (err, resp, body) => {
-    if (err) {
+    if (err || !body) {
       console.log('Something went wrong: ', err);
       res.status(500).send({ error: 'Something went wrong' });
     }
