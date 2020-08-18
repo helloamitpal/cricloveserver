@@ -1,16 +1,16 @@
 const express = require('express');
-const path = require('path');
 const request = require('request');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const cheerio = require('cheerio');
 const dotenv = require('dotenv');
-
+const cors = require('cors');
 
 const PORT = process.env.PORT || 5000;
 dotenv.config();
 
 const app = express();
+app.use(cors());
 app.use(morgan());
 app.use(bodyParser.json());
 const { API_KEY } = process.env;
@@ -33,27 +33,32 @@ const getDate = (date) => {
 
 // creating JSON for matches
 const getParsedResponse = (html) => {
-  const $ = cheerio.load(html);
-  const matches = [];
-  const allMatches = $('a');
+  try {
+    const $ = cheerio.load(html);
+    const matches = [];
+    const allMatches = $('a');
 
-  for (let index = 0, len = allMatches.length; index < len; index++) {
-    const anchor = $(allMatches[index]);
+    for (let index = 0, len = allMatches.length; index < len; index++) {
+      const anchor = $(allMatches[index]);
 
-    anchor.find('*').removeAttr('style', '');
-    const date = anchor.find('.cb-text-preview').attr('ng-bind');
-    const url = anchor.attr('href');
+      anchor.find('*').removeAttr('style', '');
+      const date = anchor.find('.cb-text-preview').attr('ng-bind');
+      const url = anchor.attr('href');
 
-    matches.push({
-      live: anchor.find('.cb-text-live').length > 0,
-      title: url.split('/').pop().split('-').join(' '),
-      url,
-      content: anchor.html(),
-      toBeStartedAt: getDate(date)
-    });
+      matches.push({
+        live: anchor.find('.cb-text-live').length > 0,
+        title: url.split('/').pop().split('-').join(' '),
+        url,
+        content: anchor.html(),
+        toBeStartedAt: getDate(date)
+      });
+    }
+
+    return matches;
+  } catch(err) {
+    console.log('Error in parsing response: ', err);
+    return [];
   }
-
-  return matches;
 };
 
 /**
