@@ -1,5 +1,5 @@
 const express = require('express');
-const request = require('request');
+const axios = require('axios');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const cheerio = require('cheerio');
@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 5000;
 dotenv.config();
 
 const app = express();
-// app.use(cors());
+app.use(cors());
 app.use(morgan());
 app.use(bodyParser.json());
 const { API_KEY } = process.env;
@@ -66,31 +66,34 @@ const getParsedResponse = (html) => {
 /**
  * Live Match APIs
  */
-app.get('/api/matches', function (req, res) {
-  request('http://www.cricbuzz.com/api/html/homepage-scag', cors(), (err, resp, body) => {
-    if (err || !body) {
-      console.log('Something went wrong: ', err);
-      res.status(500).send({ error: 'Something went wrong' });
-    }
-    console.log('Response:: ', body);
-    const output = getParsedResponse(body);
+app.get('/api/matches', async(req, res) => {
+  try {
+    const body = await axios.get('http://www.cricbuzz.com/api/html/homepage-scag', {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      }
+    });
+    console.log('Response:: ', body.data);
+    const output = getParsedResponse(body.data);
 
     console.log('output generated');
     res.json(output);
-  });
+  } catch(err) {
+    console.log('Something went wrong: ', err);
+    res.status(500).send({ error: 'Something went wrong' });
+  }
 });
 
 /**
  * Match news
  */
-app.get('/api/news', function(req, res) {
-  request(`http://newsapi.org/v2/top-headlines?country=in&category=sports&apiKey=${API_KEY}`, (err, resp) => {
-    if (err) {
-      res.status(500).send({ error: 'Something went wrong' });
-    }
-
-    res.json(resp);
-  });
+app.get('/api/news', async(req, res) => {
+  try {
+    const resp = await axios.get(`http://newsapi.org/v2/top-headlines?country=in&category=sports&apiKey=${API_KEY}`);
+    res.json(resp.data);
+  } catch (err) {
+    res.status(500).send({ error: 'Something went wrong' });
+  }
 });
 
 /**
