@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 5000;
 dotenv.config();
 
 const app = express();
-app.use(cors());
+// app.use(cors());
 app.use(morgan());
 app.use(bodyParser.json());
 const { API_KEY } = process.env;
@@ -67,7 +67,7 @@ const getParsedResponse = (html) => {
  * Live Match APIs
  */
 app.get('/api/matches', function (req, res) {
-  request('http://www.cricbuzz.com/api/html/homepage-scag', (err, resp, body) => {
+  request('http://www.cricbuzz.com/api/html/homepage-scag', cors(), (err, resp, body) => {
     if (err || !body) {
       console.log('Something went wrong: ', err);
       res.status(500).send({ error: 'Something went wrong' });
