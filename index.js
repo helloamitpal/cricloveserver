@@ -38,6 +38,8 @@ const getParsedResponse = (html) => {
     const matches = [];
     const allMatches = $('a');
 
+    console.log('INSIDE SUCCESSS: ', allMatches.length);
+
     for (let index = 0, len = allMatches.length; index < len; index++) {
       const anchor = $(allMatches[index]);
 
@@ -70,6 +72,7 @@ app.get('/api/matches', function (req, res) {
       console.log('Something went wrong: ', err);
       res.status(500).send({ error: 'Something went wrong' });
     }
+    console.log('Response:: ', body);
     const output = getParsedResponse(body);
 
     console.log('output generated');
